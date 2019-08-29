@@ -9,9 +9,8 @@ m_dep = meson.get_compiler('c').find_library('m', required: false)
 mutter_dep = []
 libmutter_dep = []
 
-vala_flags = []
-compositor_c_args =['-DCLUTTER_ENABLE_COMPOSITOR_API', '-DCLUTTER_ENABLE_EXPERIMENTAL_API',
-		'-DCOGL_ENABLE_EXPERIMENTAL_API', '-DCOGL_ENABLE_EXPERIMENTAL_2_0_API']
+vala_flags = [ '--pkg', 'cogl-fixes']
+compositor_c_args = []
 
 mutter328_dep = dependency('libmutter-2', version: ['>= 3.27', '< 3.29'], required: false)
 if mutter328_dep.found()
@@ -86,25 +85,25 @@ mutter_typelib_dir = libmutter_dep.get_pkgconfig_variable('typelibdir')
 
 # Here is the real Compositor work
 compositor_files = files(
-  'DBusAccelerator.vala',
-  'DBus.vala',
-  'KeyboardManager.vala',
-  'main.vala',
-  'MediaFeedback.vala',
-  'SystemBackground.vala',
-  'Utils.vala',
-  'WindowManager.vala'
+	'main.vala',
+	'WindowManager.vala',
+	'MediaFeedback.vala',
+	'DBus.vala',
+	'DBusAccelerator.vala',
+	'SystemBackground.vala',
+	'BlurActor.vala',
+	'Utils.vala'
 )
 
 executable(
-  meson.project_name()+'-compositor',
-  compositor_files,
-  compositor_resources,
-  config_header,
-  dependencies: [glib_dep, gtk_dep, gee_dep, m_dep, mutter_dep],
-  vala_args: vala_flags,
-  c_args: compositor_c_args,
-  build_rpath: mutter_typelib_dir,
-  install_rpath: mutter_typelib_dir,
-  install: true,
+	meson.project_name()+'-compositor',
+	compositor_files,
+	compositor_resources,
+	config_header,
+	dependencies: [glib_dep, gtk_dep, gee_dep, m_dep, mutter_dep, lightdm_dep],
+	vala_args: vala_flags,
+	c_args: compositor_c_args,
+	build_rpath: mutter_typelib_dir,
+	install_rpath: mutter_typelib_dir,
+	install: true,
 )

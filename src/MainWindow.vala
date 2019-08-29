@@ -19,8 +19,14 @@
  * Authors: Corentin Noël <corentin@elementary.io>
  */
 
+[DBus (name = "org.pantheon.greeter")]
+public interface IGreeterCompositor : Object {
+    public abstract void set_wallpaper (string path) throws Error;
+}
+
 public class Greeter.MainWindow : Gtk.ApplicationWindow {
     protected static Gtk.CssProvider css_provider;
+    private IGreeterCompositor? compositor;
 
     private GLib.Queue<unowned Greeter.UserCard> user_cards;
     private Gtk.SizeGroup card_size_group;
@@ -49,10 +55,11 @@ public class Greeter.MainWindow : Gtk.ApplicationWindow {
     }
 
     construct {
-        app_paintable = true;
         decorated = false;
         type_hint = Gdk.WindowTypeHint.DESKTOP;
         get_style_context ().add_provider (css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+        
+        compositor = Bus.get_proxy_sync<IGreeterCompositor> (BusType.SESSION, "org.pantheon.greeter", "/org/pantheon/greeter");
 
         settings = new Greeter.Settings ();
         create_session_selection_action ();
@@ -483,6 +490,23 @@ public class Greeter.MainWindow : Gtk.ApplicationWindow {
         }
 
         lightdm_greeter.notify_property ("hide-users-hint");
+        if (!user_selected) {
+            unowned Greeter.UserCard user_card = (Greeter.UserCard) user_cards.peek_head ();
+            user_card.show_input = true;
+            if (compositor != null && user_card.background_path != null) {
+                compositor.set_wallpaper (user_card.background_path);
+            }
+
+            try {
+                lightdm_greeter.authenticate (user_card.lightdm_user.name);
+            } catch (Error e) {
+                critical (e.message);
+            }
+        }
+
+        if (lightdm_greeter.default_session_hint != null) {
+            get_action_group ("session").activate_action ("select", new GLib.Variant.string (lightdm_greeter.default_session_hint));
+        }
     }
 
     private void add_card (LightDM.User lightdm_user) {
@@ -545,6 +569,10 @@ public class Greeter.MainWindow : Gtk.ApplicationWindow {
 
         if (user_card.lightdm_user.session != null) {
             get_action_group ("session").activate_action ("select", new GLib.Variant.string (user_card.lightdm_user.session));
+        }
+
+        if (compositor != null && user_card.background_path != null) {
+            compositor.set_wallpaper (user_card.background_path);
         }
 
         if (lightdm_greeter.in_authentication) {

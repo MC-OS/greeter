@@ -69,12 +69,20 @@
 #endif
     }
 
-    public void refresh () {
-        // Meta.Background.refresh_all does not refresh backgrounds with the WALLPAPER style.
-        // (Last tested with mutter 3.28)
-        // As a workaround, re-apply the current color again to force the wallpaper texture
-        // to be rendered from scratch.
-        if (system_background != null)
-            system_background.set_color (DEFAULT_BACKGROUND_COLOR);
+    public void refresh ()  {       
+        if (system_background != null) {
+            this.set_wallpaper (null);
+        }
     }
+
+    public void set_wallpaper (string? path)  {
+        if (path == null) {
+            this.background.set_color (DEFAULT_BACKGROUND_COLOR);
+            return;
+        }
+
+        var texture_file = File.new_for_path (path);
+        this.background.set_file (texture_file, GDesktop.BackgroundStyle.ZOOM);
+    }
+
 }

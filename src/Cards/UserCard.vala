@@ -28,6 +28,7 @@ public class Greeter.UserCard : Greeter.BaseCard {
     public bool show_input { get; set; default = false; }
     public double reveal_ratio { get; private set; default = 0.0; }
     public bool is_24h { get; set; default = true; }
+    public string background_path { get; construct set; }
 
     public int sleep_inactive_ac_timeout { get; set; default = 1200; }
     public int sleep_inactive_ac_type { get; set; default = 1; }
@@ -113,7 +114,7 @@ public class Greeter.UserCard : Greeter.BaseCard {
         form_revealer.add (form_grid);
         bind_property ("show-input", form_revealer, "reveal-child", GLib.BindingFlags.SYNC_CREATE);
 
-        var background_path = lightdm_user.background;
+        background_path = lightdm_user.background;
 
         if (background_path == null) {
             string path = GLib.Path.build_filename ("/", "var", "lib", "lightdm-data", lightdm_user.name, "wallpaper");
