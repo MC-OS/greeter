@@ -50,7 +50,7 @@ namespace GreeterCompositor {
         /**
          * {@inheritDoc}
          */
-        public Meta.BackgroundGroup background_group { get; protected set; }
+        public BackgroundContainer background_group { get; protected set; }
 
         Meta.PluginInfo info;
 
@@ -71,8 +71,6 @@ namespace GreeterCompositor {
         Gee.HashSet<Meta.WindowActor> destroying = new Gee.HashSet<Meta.WindowActor> ();
         Gee.HashSet<Meta.WindowActor> unminimizing = new Gee.HashSet<Meta.WindowActor> ();
         GLib.HashTable<Meta.Window, int> ws_assoc = new GLib.HashTable<Meta.Window, int> (direct_hash, direct_equal);
-
-        Greeter.SystemBackground system_background;
 
         public WindowManager () {
             info = Meta.PluginInfo () {name = "GreeterCompositor", version = Constants.VERSION, author = "elementary LLC.",
@@ -97,15 +95,8 @@ namespace GreeterCompositor {
         }
 
         void refresh_background () {
-#if HAS_MUTTER330
-            unowned Meta.Display display = get_display ();
-            var system_background = new Greeter.SystemBackground (display);
-#else
-            var screen = get_screen ();
-            var system_background = new Greeter.SystemBackground (screen);
-#endif
-
-            system_background.refresh ();
+            Meta.Background.refresh_all ();
+            BackgroundContainer.refresh ();
         }
 
         bool show_stage () {
@@ -122,17 +113,18 @@ namespace GreeterCompositor {
             KeyboardManager.init (display);
 #endif
 
-            system_background = new Greeter.SystemBackground (screen);
-            system_background.add_constraint (new Clutter.BindConstraint (stage, Clutter.BindCoordinate.ALL, 0));
-            system_background.set_wallpaper (null);
-            stage.insert_child_below (system_background, null);
-#endif
+            background_group = new BackgroundContainer (screen);
+            background_group.add_constraint (new Clutter.BindConstraint (stage, Clutter.BindCoordinate.ALL, 0));
+            background_group.set_wallpaper.begin (null);
+            stage.insert_child_below (background_group, null);
 
             ui_group = new Clutter.Actor ();
             ui_group.reactive = true;
             stage.add_child (ui_group);
 
-            BlurActor.init (3, 4.4f, 50, ui_group);
+            if (BlurActor.get_supported (this) && BlurActor.get_enabled_by_default ()) {
+                BlurActor.init (3, 4.4f, 50, ui_group);
+            }
 
             window_group = Compositor.get_window_group_for_screen (screen);
             stage.remove_child (window_group);
@@ -193,7 +185,9 @@ namespace GreeterCompositor {
         }
 
         public void set_wallpaper (string path) {
-            system_background.set_wallpaper (path);
+            if (BlurActor.is_initted ()) {
+                background_group.set_wallpaper.begin (path);
+            }
         }
 
         public uint32[] get_all_xids () {
