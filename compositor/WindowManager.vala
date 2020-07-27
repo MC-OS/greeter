@@ -167,7 +167,7 @@ namespace GreeterCompositor {
             Meta.register_with_session ();
 
             if (BlurActor.get_supported (this) && BlurActor.get_enabled_by_default ()) {
-                BlurActor.init (3, 4.4f, 50, ui_group);
+                BlurActor.init (1, 0.0f, 0, ui_group);
                 foreach (var workspace in get_screen ().get_workspaces ()) {
                     foreach (var window in workspace.list_windows ()) {
                         if (window.get_window_type () == DESKTOP) {
