@@ -92,7 +92,6 @@ compositor_files = files(
 	'DBusAccelerator.vala',
 	'BackgroundContainer.vala',
 	'RendererInfo.vala',
-	'BlurActor.vala',
 	'Utils.vala'
 )
 

@@ -58,7 +58,7 @@ namespace GreeterCompositor
             if (path == current_actor_path) {
                 return;
             }
-            
+
             if (actors.has_key (path)) {
                 new_background_actor = actors[path];
             } else {
@@ -75,7 +75,7 @@ namespace GreeterCompositor
                 new_background_actor = new Meta.BackgroundActor (screen, 0);
                 new_background_actor.background = new_background;
             }
-                
+
             var current_actor = actors[current_actor_path];
             if (current_actor == null) {
                 add_child (new_background_actor);
@@ -101,7 +101,7 @@ namespace GreeterCompositor
                     image.disconnect (loaded_id);
                     Idle.add (wait_for_load.callback);
                 });
-                
+
                 yield;
 			}
         }
@@ -121,16 +121,6 @@ namespace GreeterCompositor
 
         void destroy_animate_background (Clutter.Actor actor)
         {
-            BlurActor.thaw_redraws ();
-            completed_id = actor.transitions_completed.connect (() => {
-                actor.disconnect (completed_id);
-                remove_child (actor);
-                actor.opacity = 255U;
-                completed_id = 0U;
-                destroy_background_finished ();
-                BlurActor.freeze_redraws ();
-            });
-
             actor.save_easing_state ();
             actor.set_easing_duration (300);
             actor.set_easing_mode (Clutter.AnimationMode.EASE_IN_OUT_CUBIC);

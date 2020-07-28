@@ -166,27 +166,11 @@ namespace GreeterCompositor {
             // let the session manager move to the next phase
             Meta.register_with_session ();
 
-            if (BlurActor.get_supported (this) && BlurActor.get_enabled_by_default ()) {
-                BlurActor.init (1, 0.0f, 0, ui_group);
-                foreach (var workspace in get_screen ().get_workspaces ()) {
-                    foreach (var window in workspace.list_windows ()) {
-                        if (window.get_window_type () == DESKTOP) {
-                            var actor = (Meta.WindowActor)window.get_compositor_private ();
-                            var blur_actor = new BlurActor (actor);
-                            actor.insert_child_below (blur_actor, null);
-                            break;
-                        }
-                    }
-                }
-            }
-
             return false;
         }
 
         public void set_wallpaper (string path) {
-            if (BlurActor.is_initted ()) {
                 background_group.set_wallpaper.begin (path);
-            }
         }
 
         public uint32[] get_all_xids () {
@@ -371,17 +355,6 @@ namespace GreeterCompositor {
         public override void unminimize (WindowActor actor) {
             actor.show ();
             unminimize_completed (actor);
-            return;
-        }
-
-        public override void map (WindowActor actor) {
-            if (actor.get_meta_window ().get_window_type () == DESKTOP) {
-                var blur_actor = new BlurActor (actor);
-                actor.insert_child_below (blur_actor, null);
-            }
-
-            actor.show ();
-            map_completed (actor);
             return;
         }
 
