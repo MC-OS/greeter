@@ -121,6 +121,14 @@ namespace GreeterCompositor
 
         void destroy_animate_background (Clutter.Actor actor)
         {
+            completed_id = actor.transitions_completed.connect (() => {
+                actor.disconnect (completed_id);
+                remove_child (actor);
+                actor.opacity = 255U;
+                completed_id = 0U;
+                destroy_background_finished ();
+            });
+
             actor.save_easing_state ();
             actor.set_easing_duration (300);
             actor.set_easing_mode (Clutter.AnimationMode.EASE_IN_OUT_CUBIC);
