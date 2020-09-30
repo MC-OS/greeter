@@ -488,7 +488,7 @@ public class Greeter.MainWindow : Gtk.ApplicationWindow {
                 return Source.REMOVE;
             });
         }
-
+        bool user_selected = false;
         lightdm_greeter.notify_property ("hide-users-hint");
         if (!user_selected) {
             unowned Greeter.UserCard user_card = (Greeter.UserCard) user_cards.peek_head ();
