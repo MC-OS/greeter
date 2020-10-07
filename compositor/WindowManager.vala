@@ -122,9 +122,6 @@ namespace GreeterCompositor {
             ui_group.reactive = true;
             stage.add_child (ui_group);
 
-            window_group = Compositor.get_window_group_for_screen (screen);
-            stage.remove_child (window_group);
-            ui_group.add_child (window_group);
 
 #if HAS_MUTTER330
             top_window_group = display.get_top_window_group ();
